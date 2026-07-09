@@ -1,0 +1,11 @@
+{:itonami.blueprint/id "cloud-itonami-8219"
+ :itonami.blueprint/name "Community Office Support Services Operations"
+ :itonami.blueprint/isic-rev5 "8219"
+ :itonami.blueprint/domain :commercial/office-support-services
+ :itonami.blueprint/license "AGPL-3.0-or-later"
+ :itonami.blueprint/social-impact [:data-privacy :local-jobs :access-to-services]
+ :itonami.blueprint/governor :office-support-governor
+ :itonami.blueprint/robotics true
+ :itonami.blueprint/required-technologies [:robotics :identity :forms :dmn :bpmn :audit-ledger :labor]
+ :itonami.blueprint/optional-technologies [:optimization]
+ :itonami.blueprint/status :public-oss}
