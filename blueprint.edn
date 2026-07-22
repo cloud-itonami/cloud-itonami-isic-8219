@@ -8,4 +8,38 @@
  :itonami.blueprint/robotics true
  :itonami.blueprint/required-technologies [:robotics :identity :forms :dmn :bpmn :audit-ledger :labor]
  :itonami.blueprint/optional-technologies [:optimization]
- :itonami.blueprint/status :public-oss}
+ :itonami.blueprint/status :public-oss
+ :itonami.blueprint/maturity :implemented
+ :itonami.blueprint/implemented-slice
+ "OfficeSupport-LLM ⊣ Office Support Governor, langgraph-clj StateGraph
+ (langgraph.graph, ofsup.operation/build), append-only audit ledger
+ (ofsup.store/ledger + append-ledger!, MemStore and a DatomicStore
+ backed by langchain.db via langchain-store.core). A back-office
+ OPERATIONS COORDINATION actor for office-support services
+ (photocopying/document-preparation/mailing) -- not the authority that
+ finalizes a data-privacy-compliance decision over a client's
+ documents and not the authority that releases/discloses a client's
+ documents (both remain a certified operator's own act). Four ops
+ (`:log-service-record` / `:schedule-service-operation` / `:flag-
+ confidentiality-concern` / `:coordinate-supply-order`), all `:effect
+ :propose` only. Ten HARD invariants (effect-not-propose, op/action
+ allowlist x2, scope-exclusion text-scan, no-spec-basis, record-not-
+ verified, registration-unconfirmed, open-confidentiality-concern,
+ already-scheduled, already-coordinating) elaborate this blueprint's
+ Governor, grounded in a per-jurisdiction spec-basis catalog
+ (`ofsup.facts`) citing REAL public sources (California Legal Document
+ Assistants Act Bus. & Prof. Code SS6400, UK ICO data-protection-fee
+ notification, Japan APPI/PPC) -- never a fabricated jurisdiction
+ requirement. `:flag-confidentiality-concern` ALWAYS escalates to a
+ human office-support operations coordinator via the compiled graph's
+ `:request-approval` node (`interrupt-before`, checkpoint-based
+ resume), independently enforced by both `ofsup.phase` (never in any
+ phase's `:auto` set) and `ofsup.governor` (unconditional `high-
+ stakes`); `:log-service-record` / `:schedule-service-operation` /
+ low-cost `:coordinate-supply-order` are phase-3 auto-eligible when
+ the Governor is clean. Every commit/hold/approval-rejected decision
+ lands in the append-only ledger -- 47 tests / 446 assertions green
+ (`clojure -M:dev:test`, including a StateGraph integration test
+ exercising commit / hard-hold / escalate-approve / escalate-reject
+ end to end via `langgraph.graph/run*`), demo runnable end-to-end
+ (`clojure -M:dev:run`)."}

@@ -14,8 +14,14 @@
  ;; This repo is standalone (forkable outside the workspace); the
  ;; :local/root paths only resolve inside the monorepo checkout -- a
  ;; standalone fork should override them with git coordinates.
+ ;; langchain-store: the shared langchain.db store seam (EDN-blob codec +
+ ;; identity schema + event-log read/append helpers) that ~190
+ ;; cloud-itonami actors hand-roll (ADR-2607141600); ofsup.store's
+ ;; DatomicStore uses it instead of its own enc/dec* two-liner.
  :deps {io.github.kotoba-lang/langgraph
-        {:local/root "../../kotoba-lang/langgraph"}}
+        {:local/root "../../kotoba-lang/langgraph"}
+        io.github.kotoba-lang/langchain-store
+        {:local/root "../../kotoba-lang/langchain-store"}}
  :aliases
  {;; offline workspace dev -- pin transitive langchain to local checkout
   :dev {:override-deps
