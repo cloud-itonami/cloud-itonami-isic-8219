@@ -35,11 +35,19 @@
   basis, approved by whom' is always a query over an immutable log --
   the audit trail a client or regulator trusting an office-support
   operator needs, and the evidence an operator needs if a schedule or
-  a supply order is later disputed."
-  (:require #?(:clj  [clojure.edn :as edn]
-               :cljs [cljs.reader :as edn])
-            [ofsup.registry :as registry]
-            [langchain.db :as d]))
+  a supply order is later disputed.
+
+  The EDN-blob codec, `:db.unique/identity` schema builder, and the
+  seq-keyed ledger/schedule-history/supply-history event-log read are
+  the shared `kotoba-lang/langchain-store` machinery (ADR-2607141600)
+  -- the seam ~190 cloud-itonami actors hand-roll as their own private
+  `enc`/`dec*` two-liner; this store keeps only its domain wiring
+  (job->tx/pull->job field shaping, the sequence counters, and the
+  combined per-op transacts that must land atomically with a job
+  update)."
+  (:require [ofsup.registry :as registry]
+            [langchain.db :as d]
+            [langchain-store.core :as ls]))
 
 (defprotocol Store
   (job [s id])
@@ -209,16 +217,11 @@
   Map/compound values (ledger facts, schedule/supply records) are
   stored as EDN strings so `langchain.db` doesn't expand them into
   sub-entities -- the same convention every sibling actor's store
-  uses."
-  {:job/id                        {:db/unique :db.unique/identity}
-   :ledger/seq                    {:db/unique :db.unique/identity}
-   :schedule/seq                  {:db/unique :db.unique/identity}
-   :supply/seq                    {:db/unique :db.unique/identity}
-   :schedule-sequence/jurisdiction {:db/unique :db.unique/identity}
-   :supply-sequence/jurisdiction   {:db/unique :db.unique/identity}})
-
-(defn- enc [v] (pr-str v))
-(defn- dec* [s] (when s (edn/read-string s)))
+  uses. Built via `langchain-store.core/identity-schema` (every attr
+  here is a plain `:db.unique/identity` mark)."
+  (ls/identity-schema
+   [:job/id :ledger/seq :schedule/seq :supply/seq
+    :schedule-sequence/jurisdiction :supply-sequence/jurisdiction]))
 
 (defn- job->tx [{:keys [id client document-type document-count turnaround-hours
                         requires-registration?
@@ -230,7 +233,7 @@
                         jurisdiction status]}]
   (cond-> {:job/id id}
     client                                        (assoc :job/client client)
-    document-type                                    (assoc :job/document-type (enc document-type))
+    document-type                                    (assoc :job/document-type (ls/enc document-type))
     document-count                                     (assoc :job/document-count document-count)
     turnaround-hours                                     (assoc :job/turnaround-hours turnaround-hours)
     (some? requires-registration?)                         (assoc :job/requires-registration? requires-registration?)
@@ -260,7 +263,7 @@
 (defn- pull->job [m]
   (when (:job/id m)
     {:id (:job/id m) :client (:job/client m)
-     :document-type (dec* (:job/document-type m))
+     :document-type (ls/dec* (:job/document-type m))
      :document-count (:job/document-count m) :turnaround-hours (:job/turnaround-hours m)
      :requires-registration? (boolean (:job/requires-registration? m))
      :registered? (boolean (:job/registered? m))
@@ -283,17 +286,11 @@
          (map #(pull->job (d/pull (d/db conn) job-pull [:job/id %])))
          (sort-by :id)))
   (ledger [_]
-    (->> (d/q '[:find ?s ?f :where [?e :ledger/seq ?s] [?e :ledger/fact ?f]] (d/db conn))
-         (sort-by first)
-         (mapv (comp dec* second))))
+    (ls/read-stream conn :ledger/seq :ledger/fact))
   (schedule-history [_]
-    (->> (d/q '[:find ?s ?r :where [?e :schedule/seq ?s] [?e :schedule/record ?r]] (d/db conn))
-         (sort-by first)
-         (mapv (comp dec* second))))
+    (ls/read-stream conn :schedule/seq :schedule/record))
   (supply-history [_]
-    (->> (d/q '[:find ?s ?r :where [?e :supply/seq ?s] [?e :supply/record ?r]] (d/db conn))
-         (sort-by first)
-         (mapv (comp dec* second))))
+    (ls/read-stream conn :supply/seq :supply/record))
   (next-schedule-sequence [_ jurisdiction]
     (or (d/q '[:find ?n . :in $ ?j
               :where [?e :schedule-sequence/jurisdiction ?j] [?e :schedule-sequence/next ?n]]
@@ -336,7 +333,7 @@
         (d/transact! conn
                      [(job->tx (assoc (merge (job s job-id) job-patch) :id job-id))
                       {:schedule-sequence/jurisdiction jurisdiction :schedule-sequence/next next-n}
-                      {:schedule/seq (count (schedule-history s)) :schedule/record (enc (get result "record"))}])
+                      {:schedule/seq (count (schedule-history s)) :schedule/record (ls/enc (get result "record"))}])
         result)
 
       :job/mark-supply-coordinated
@@ -347,13 +344,12 @@
         (d/transact! conn
                      [(job->tx (assoc (merge (job s job-id) job-patch) :id job-id))
                       {:supply-sequence/jurisdiction jurisdiction :supply-sequence/next next-n}
-                      {:supply/seq (count (supply-history s)) :supply/record (enc (get result "record"))}])
+                      {:supply/seq (count (supply-history s)) :supply/record (ls/enc (get result "record"))}])
         result)
       nil)
     s)
   (append-ledger! [s fact]
-    (d/transact! conn [{:ledger/seq (count (ledger s)) :ledger/fact (enc fact)}])
-    fact)
+    (ls/append-blob! conn :ledger/seq :ledger/fact (count (ledger s)) fact))
   (with-jobs [s jobs]
     (when (seq jobs) (d/transact! conn (mapv job->tx (vals jobs)))) s))
 
