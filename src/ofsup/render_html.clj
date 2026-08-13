@@ -437,8 +437,13 @@
     (vec (for [o (sort (map kw governor/allowed-ops))
                :let [o-kw (keyword o)]]
            (row (str "<code>:" (esc o) "</code>")
+                ;; NB: an explicit "no" branch. A nil here would render as an
+                ;; EMPTY cell, which reads as "not determined" when the answer
+                ;; is a definite no -- the same silence-looks-like-clean shape
+                ;; the two hold tables above exist to avoid.
                 (if (contains? auto3 o-kw)
-                  "<span class=\"ok\">phase-3 auto-commit when the governor is clean</span>")
+                  "<span class=\"ok\">phase-3 auto-commit when the governor is clean</span>"
+                  "<span class=\"critical\">never — not in any phase&rsquo;s :auto set</span>")
                 (cond
                   (= :flag-confidentiality-concern o-kw)
                   "<span class=\"warn\">ALWAYS human &middot; never in any phase&rsquo;s :auto set &middot; unconditional high-stakes</span>"
