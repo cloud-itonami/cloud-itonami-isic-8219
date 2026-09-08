@@ -52,7 +52,7 @@
   wording care alone."
   (:require #?(:clj  [clojure.edn :as edn]
                :cljs [cljs.reader :as edn])
-            [clojure.string :as str]
+            [kotoba.lang.text :as str]
             [ofsup.facts :as facts]
             [ofsup.governor :as governor]
             [ofsup.store :as store]

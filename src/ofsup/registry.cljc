@@ -18,7 +18,7 @@
   those remain a certified office-support operator's own act, entirely
   outside this actor's closed op allowlist (see `ofsup.governor` ns
   docstring `SCOPE`)."
-  (:require [clojure.string :as str]))
+  (:require [kotoba.lang.text :as str]))
 
 (defn- unsigned-certificate
   "Every certificate this actor produces is UNSIGNED -- signature is
@@ -51,7 +51,7 @@
     (throw (ex-info "service-schedule: jurisdiction required" {})))
   (when (< sequence 0)
     (throw (ex-info "service-schedule: sequence must be >= 0" {})))
-  (let [schedule-number (str (str/upper-case jurisdiction) "-SVC-" (zero-pad sequence 6))
+  (let [schedule-number (str (str/upper jurisdiction) "-SVC-" (zero-pad sequence 6))
         record {"record_id" schedule-number
                 "kind" "service-schedule-draft"
                 "job_id" job-id
@@ -76,7 +76,7 @@
     (throw (ex-info "supply-order: jurisdiction required" {})))
   (when (< sequence 0)
     (throw (ex-info "supply-order: sequence must be >= 0" {})))
-  (let [supply-number (str (str/upper-case jurisdiction) "-SUP-" (zero-pad sequence 6))
+  (let [supply-number (str (str/upper jurisdiction) "-SUP-" (zero-pad sequence 6))
         record {"record_id" supply-number
                 "kind" "supply-order-draft"
                 "job_id" job-id

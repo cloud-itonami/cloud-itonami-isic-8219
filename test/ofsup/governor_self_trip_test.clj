@@ -17,7 +17,7 @@
   concern/already-open/no-spec-basis branches), and asserts NONE of
   the resulting proposals trip `scope-exclusion-violations` -- the
   actual guarantee, not wording care alone."
-  (:require [clojure.string :as str]
+  (:require [kotoba.lang.text :as str]
             [clojure.test :refer [deftest is testing]]
             [ofsup.governor :as governor]
             [ofsup.ofsupllm :as llm]
@@ -62,7 +62,7 @@
                   :flag-confidentiality-concern :coordinate-supply-order]
               subject subjects]
         (let [proposal (llm/-advise advisor db {:op op :subject subject :estimated-cost-usd 250})
-              text (str/lower-case (str (:summary proposal) " " (:rationale proposal)))]
+              text (str/lower (str (:summary proposal) " " (:rationale proposal)))]
           (doseq [phrase governor/scope-exclusion-actions]
-            (is (not (str/includes? text (str/lower-case phrase)))
+            (is (not (str/includes? text (str/lower phrase)))
                 (str op "/" subject " rationale unexpectedly contains exclusion phrase " (pr-str phrase)))))))))
