@@ -89,7 +89,7 @@ phrases in `ofsup.governor/scope-exclusion-actions` ("finalize the
 data-privacy-compliance determination for these documents", "release
 these client documents without client authorization") -- phrased as
 the complete action, not a noun a denial sentence would also contain.
-`test/ofsup/governor_self_trip_test.clj` is the actual guarantee, not
+`test/ofsup/governor_self_trip_test.kotoba` is the actual guarantee, not
 wording care alone: it runs the default mock advisor's `infer` across
 every op and every seeded job (including the registration/open-
 concern/already-open/no-spec-basis/high-and-low-cost branches) and
@@ -196,7 +196,7 @@ store_contract_test.clj`.
   unrelated to this build).
 - Establishes the closed four-op/four-action allowlist as a literal,
   structurally-enforced (not merely documented) invariant.
-- `test/ofsup/governor_self_trip_test.clj` is a dedicated, fleet-
+- `test/ofsup/governor_self_trip_test.kotoba` is a dedicated, fleet-
   pattern regression test against the self-tripping scope-exclusion
   bug class -- not just careful wording.
 - `MemStore` ‖ `DatomicStore` parity is proven by `test/ofsup/
