@@ -201,7 +201,7 @@ store_contract_test.clj`.
   bug class -- not just careful wording.
 - `MemStore` ‖ `DatomicStore` parity is proven by `test/ofsup/
   store_contract_test.clj`.
-- The demo (`clojure -M:dev:run`) walks one clean record-log +
+- The demo (`kbb -M:dev:run`) walks one clean record-log +
   service-schedule (auto-commit) + low-cost supply-order (auto-commit)
   + high-cost supply-order (escalate/approve/commit, different job) +
   confidentiality-concern-flag (always escalate/approve/commit)
@@ -210,7 +210,7 @@ store_contract_test.clj`.
   preparer registration, an open confidentiality concern on two
   different ops, an already-open supply-order coordination, a
   double-schedule, and a double supply-order coordination), end-to-end.
-- `clojure -M:test`: see this superproject's own landing ADR
+- `kbb -M:test`: see this superproject's own landing ADR
   (`90-docs/adr/*-cloud-itonami-isic-8219-office-support-coverage.md`)
   for the exact `Ran N tests containing M assertions, 0 failures, 0
   errors` output captured at merge time.

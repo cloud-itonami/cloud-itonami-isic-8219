@@ -39,7 +39,7 @@
  low-cost `:coordinate-supply-order` are phase-3 auto-eligible when
  the Governor is clean. Every commit/hold/approval-rejected decision
  lands in the append-only ledger -- 47 tests / 446 assertions green
- (`clojure -M:dev:test`, including a StateGraph integration test
+ (`kbb -M:dev:test`, including a StateGraph integration test
  exercising commit / hard-hold / escalate-approve / escalate-reject
  end to end via `langgraph.graph/run*`), demo runnable end-to-end
- (`clojure -M:dev:run`)."}
+ (`kbb -M:dev:run`)."}

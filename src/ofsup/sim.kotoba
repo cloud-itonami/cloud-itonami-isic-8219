@@ -1,5 +1,5 @@
 (ns ofsup.sim
-  "Demo driver -- `clojure -M:dev:run`. Walks a clean job through
+  "Demo driver -- `kbb -M:dev:run`. Walks a clean job through
   record logging (auto-commit) -> service-schedule coordination
   (auto-commit, clean) -> low-cost supply-order coordination
   (auto-commit) -> high-cost supply-order coordination (escalate/
